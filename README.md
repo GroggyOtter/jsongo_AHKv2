@@ -97,7 +97,9 @@ The forward slashe (solidus) is the only character in JSON that can be optionall
   Example: `{"URL":"https://github.com/GroggyOtter/jsongo_AHKv2/"}`
 
 ### `.escape_backslash`  
-test
+Backslashes can be escaped two ways: Escape character `\\` and unicode escaping `\u005C`.
+* `true` => **[Default]** Backslashes will be escaped `\\`
+* `false` => Backslashes are escaped using unicode `\u005c`
 
 ### `.extract_all`
 * `true` => When exporting an AHK object, any object derived from the base Object will be processed and exported as a map.  
@@ -133,16 +135,32 @@ Prevents having to worry about error popups.
 ## Use:  
 [`Back to Contents`](#contents)  
 
-### Parse()
+### JSON text to Object: Parse(json)
 
-The `Parse() method is used to turn a JSON string into an AHK object.
+The `Parse()` method is used to turn a JSON string into an AHK object.  
+
 ```
 object := jsongo.Parse(jsonString)
 ```
 
-### Parse() Reviver
+### Parse Revivers: Parse(json, reviver)
 
-A reviver is 
+The reviver should be a reference to a function or method.  
+It requires at least 3 parameters to receive the key name, value name, and a remove variable.  
+
+Example of how a reviver function should be structured.  
+```
+reviver_function(key, value, remove) {
+	
+}
+```
+
+Note that you can have any amount of parameters and they can be optional, but there must be at least 3 spots for the parameters to go.  
+If you only need the key, this function would be valid because `value` and `remove` are absorbed by the parameter tampon `*` (Yes, that's what I call it in my head.)
+
+```
+reviver_function(key, *)
+```
 
 ### Stringify()
 
@@ -221,4 +239,3 @@ ExitApp()
 
 ### Beta - 20230627  
 * Initial release of jsongo
-
