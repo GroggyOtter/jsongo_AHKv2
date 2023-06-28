@@ -1,14 +1,21 @@
 # jsongo for AHKv2
 
 Full JSON support for AHKv2 written natively in AHK.  
-Closely mimics Mozilla's JSON format, using `Parse()` and `Stringify()`.  
-Includes Parse() reviver, Stringify() replacer, and Stringify() spacer options.  
+Closely mimics Mozilla's JSON format, including the optional parameters.  
+```
+; JSON string to AHK object
+object := Parse(json [,reviver])
+
+; AHK object to JSON string
+json := Stringify(object [,replacer ,spacer ,extract_all])
+```
 
 ## Contents
 
 ### **[Methods](#methods-1)**
   * **[`.Parse()`](#parsejson-reviver--)**
   * **[`.Stringify()`](#stringifyobject-replacer---spacer---extract_all--0)**
+  * **[`.Pretty()`]()**
 
 ### **[Properties](#properties-1)**
   * **[`.escape_slash`](#escape_slash)**
@@ -135,7 +142,7 @@ Prevents having to worry about error popups.
 ## Use:  
 [`Back to Contents`](#contents)  
 
-### JSON text to Object: Parse(json)
+### JSON text to Object: `Parse(json)`
 
 The `Parse()` method is used to turn a JSON string into an AHK object.  
 
@@ -143,26 +150,56 @@ The `Parse()` method is used to turn a JSON string into an AHK object.
 object := jsongo.Parse(jsonString)
 ```
 
-### Parse Revivers: Parse(json, reviver)
+### Parse Revivers: `Parse(json, reviver)`
 
 The reviver should be a reference to a function or method.  
 It requires at least 3 parameters to receive the key name, value name, and a remove variable.  
 
 Example of how a reviver function should be structured.  
 ```
+; At least 3 parameters
 reviver_function(key, value, remove) {
-	
+	; Always return the original value
+	return value
 }
 ```
 
-Note that you can have any amount of parameters and they can be optional, but there must be at least 3 spots for the parameters to go.  
-If you only need the key, this function would be valid because `value` and `remove` are absorbed by the parameter tampon `*` (Yes, that's what I call it in my head.)
+It's worth noting that You can have any amount of parameters and they can be optional.  
+The only requirement is that there's a place for all 3 parameter to be passed into. 
+
+If you were going to blank out all values with a certain key name, the only parameter you need is the `key` parameter.  
+This would be a valid reviver:
 
 ```
-reviver_function(key, *)
+reviver_function(key, value, *) {
+	if (key == 'temp_info')
+	    return ''
+	return value
+}
 ```
 
-### Stringify()
+`remove` is absorbed by the parameter tampon `*`. Yes, that is what I call it.  
+It's actually a variadiac parameter that takes in any amount of parameters and puts them into an array.  
+With no value assigned the array, an array is never created and all the values fizzle.  
+Meaning they're discarded.
+
+### AHK objec to JSON text `Stringify(object)`
+
+The `Stringify()` method is used to turn an AHK object into a JSON string.  
+
+```
+json := jsongo.Stringify(object)
+```
+
+Object can be a Map, Array, String, Integer, or Float.  
+By default, jsongo respects JSON's data structure and doesn't accept any other objects.  
+JSON is about transmitting data, not creating structures and prototypes in multiple languages.  
+
+This library comes with options some might want.  
+`extract_objects` causes AHK to additionally accpet literal objects.  
+It attempts to loop through all object properites and export them in associative array (map) format.  
+`extract_all` causes AHK to accpet any object type.  
+It attempts to loop through all object properites and export them in associative array (map) format.
 
 ### Stringify()
 
