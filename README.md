@@ -142,7 +142,7 @@ Used to convert an AHK object into a JSON string.
 json := Stringify(obj [,replacer:='' ,spacer:='' ,extract_all:=0])
 ```
 
-#### - `object` [[Map](https://www.autohotkey.com/docs/v2/lib/Map.htm) | [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm) | [Object](https://www.autohotkey.com/docs/v2/lib/Object.htm)]  
+#### - `obj` [[Map](https://www.autohotkey.com/docs/v2/lib/Map.htm) | [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm) | [Object](https://www.autohotkey.com/docs/v2/lib/Object.htm)]  
 
 JSON is about transmitting data, not creating structures and prototypes.  
 By default, **jsongo** respects the core data ideology behind the JSON data structure and only accepts [Maps](https://www.autohotkey.com/docs/v2/lib/Map.htm), [Arrays](https://www.autohotkey.com/docs/v2/lib/Array.htm), [Strings](https://www.autohotkey.com/docs/v2/Concepts.htm#strings), and [Numbers](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers).  
