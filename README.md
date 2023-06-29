@@ -23,17 +23,20 @@ MsgBox(json)
 
 ## Contents
 
-### 0) [Preface: Preface, Peep(), and `[]` Square Bracket Syntax](#0-quick-syntax-clarification-and-peep-recommendation)
+### 0) [Preface: Preface, Peep(), `[]` Square Bracket Syntax, and "Why jsongo?"](#0-quick-syntax-clarification-and-peep-recommendation)
 
 ### 1) [.Methods()](#1-methods-1)
   * **[Parse()](#parse)**
     * **[json [String]](#--json-string)**
     * **[reviver [Function] [optional]](#--reviver-function--optional)**
+    * **[RETURN value](#--return--value)**
+
   * **[Stringify()](#stringify)**
     * **[obj [Map | Array | Object]](#--object-map--array--object)**
     * **[replacer [Function | Array] [optional]](#--replacer-function-optional)**
     * **[spacer [String | Number] [optional]](#--spacer-string--number-optional)**
     * **[extract_all [Bool] [optional]](#--extract_all-bool-optional)**
+    * **[RETURN value](#--return--value-1)**
 
 ### 2) [.Properties](#2-properties-1)
   * [`.escape_slash`](#escape_slash)
@@ -53,8 +56,8 @@ MsgBox(json)
   => `json := jsongo.Stringify(obj)`](#using-stringify-ahk-object-to-json-string)**
   * **[Stringify Replacers: Access to key:value pairs  
   => `json := jsongo.Stringify(obj, replacer)`](#stringify-replacers-access-to-keyvalue-pairs)**
-  * **[Stringify Spacers: JSON sting formatting options  
-  => `json := jsongo.Stringify(obj, , spacer)`](#stringify-spacers-json-string-formatting-options)**
+  * **[Stringify Spacers: JSON string formatting option
+  => `json := jsongo.Stringify(obj, , spacer)`](#stringify-spacers-json-string-formatting-option)**
 
 ### **4) [ChangeLog](#4-changelog-1)**
   * **[BETA](#beta---20230627)**
@@ -90,6 +93,13 @@ IsDown := GetKeyState(KeyName [,Mode])
 In that example, `KeyName` is *required*, but `Mode` is optional.
 
 I wanted to add this for the coders who may not realize what the meaning of `[]` square brackets are in AHK syntax.
+
+#### "Why call it jsongo?"
+
+It stands for JSONGroggyOtter.  
+jsongo is a short class name.  
+It's identifiable.  
+And the big reason is it leaves the `json` namespace open for use so you don't accidentally try to overwrite a class named `json` when you use that a variable or property name.
 
 ## 1) .Methods()  
 [`Back to Contents`](#contents)  
@@ -138,19 +148,18 @@ JSON is about transmitting data, not creating structures and prototypes.
 By default, **jsongo** respects the core data ideology behind the JSON data structure and only accepts [Maps](https://www.autohotkey.com/docs/v2/lib/Map.htm), [Arrays](https://www.autohotkey.com/docs/v2/lib/Array.htm), [Strings](https://www.autohotkey.com/docs/v2/Concepts.htm#strings), and [Numbers](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers).  
 AHK has no true `true`, `false`, or `null` data types so they are converted to `1`, `0`, and `''` an empty string (respectively).  
 
-[Literal Objects](https://www.autohotkey.com/docs/v2/Objects.htm#object-literal) are accepted if the [`extract_objects` property](#extract_objects) is set to true.  
-[All object types](https://www.autohotkey.com/docs/v2/ObjList.htm) are accepted if the [`extract_all` property](#extract_all) or [`extract_all` parameter](#--extract_all-bool-optional) are set to true.  
+[Literal Objects](https://www.autohotkey.com/docs/v2/Objects.htm#object-literal) are accepted if the [`.extract_objects` property](#extract_objects) is set to true.  
+[All object types](https://www.autohotkey.com/docs/v2/ObjList.htm) are accepted if the [`.extract_all` property](#extract_all) or [`extract_all` parameter](#--extract_all-bool-optional) are set to true.  
 Object types are exported in a `{key:value}` format, where the property name is used as the key.  
-Key names must be a [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings).  
-Non-string key names will throw an error.
+Key names must be a [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings) or an error will be thrown.  
 
 #### - `replacer` [[Function](https://www.autohotkey.com/docs/v2/misc/Functor.htm)] **[optional]**  
 Used to access all `key:value` pairs extracted from the AHK object before they're added to the JSON string.  
-A `replacer` can be either a [Function](https://www.autohotkey.com/docs/v2/misc/Functor.htm) or an [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm).  
+A `replacer` can be either a [Function()/FuncObject](https://www.autohotkey.com/docs/v2/misc/Functor.htm)/[Method()](https://www.autohotkey.com/docs/v2/Language.htm#operators-for-objects) or an [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm).  
 
-If a [Function()/FuncObject](https://www.autohotkey.com/docs/v2/misc/Functor.htm) or [Method](https://www.autohotkey.com/docs/v2/Language.htm#operators-for-objects) reference is used, it requires at least 3 parameters so it can receive the current `key`, `value`, and a special `remove` variable.  
+If a [Function()/FuncObject](https://www.autohotkey.com/docs/v2/misc/Functor.htm)/[Method()](https://www.autohotkey.com/docs/v2/Language.htm#operators-for-objects) reference is used, it requires at least 3 parameters so it can receive the current `key`, `value`, and a special `remove` variable.  
 The function/method is expected to return the original value, an altered value, or no value (`''` an empty string).  
-Alternatively, the `remove` variable from parameter 3 can be returned which instructs the parser to discard the current `key:value` pair and not add it to the string.
+In addition, the `remove` variable from parameter 3 can be returned which instructs the parser to discard the current `key:value` pair and not add it to the string.
 
 Replacer functions/methods act very similarly to revivers.  
 
@@ -309,7 +318,7 @@ ExitApp()
 
 ***
 
-### Parse Revivers: Access to key:value pairs
+### Parse Revivers: Access to `key:value` pairs
 
 The purpose of the `reviver` is to give the user access to every `key:value` pair before they are added to the AHK object.  
 This gives the user the option to keep, alter, or delete the value as well as the option to completely omit the `key:value` pair.
@@ -335,9 +344,11 @@ reviver_function(key, value, remove) {
 The 3rd parameter is the `remove` parameter.  
 It's a special value that, when returned, instructs the parser to discard the current `key:value` pair.  
 
-If you wanted to remove all numbers from the string, you'd use a reviver like this:
+If you wanted to remove all numbers when importing the JSON string to an object, you'd use a reviver like this:
 
 ```
+#Include jsongo.v2.ahk
+
 json := '{"string":"some text", "integer":420, "float":4.20, "string2":"more text"}'
 obj := jsongo.Parse(json, remove_numbers)
 obj.Default := 'Key does not exist'
@@ -369,12 +380,13 @@ reviver_function(key:='', *) {
 }
 ```
 
-You wouldn't be able to do much with it other than remove everything the ability to remove things because the `remove` parameter is absorbed by the `*` parameter tampon.  
+You wouldn't be able to do much with it because you don't have access to the `value` or the `remove` variables as they're absorbed by the `*` parameter tampon.  
 Yes, that is what I call it.  
 In actuality, it's a [variadiac parameter](https://www.autohotkey.com/docs/v2/Functions.htm#Variadic) that can take in any amount of parameters and puts them all into an array.  
 With no value assigned to the array, the array is never created and all values fizzle. (Meaning they are discarded.)
 
-Example of a reviver function that formats phone numbers from a `5551234567` format to a `(555) 123-4567` format and correct email address from @ahk.com to @autohotkey.com:
+Here's another reviver example that formats phone numbers to a `(###) ###-####` format.  
+It also corrects email addresses from `@ahk.com` to `@autohotkey.com`:
 ```
 json := 
 (
@@ -431,38 +443,48 @@ JSON is about transmitting data, not creating structures and prototypes.
 That's why **jsongo** respects the core data ideology behind the JSON data structure and defaults to only accepting Arrays, Maps, Strings, and Numbers by default.  
 Everything else will throw an error.  
 
-[Literal objects](https://www.autohotkey.com/docs/v2/Objects.htm#object-literal) are included if the [`.extract_objects` property](#extract_objects) is set to true.  
+[Literal Objects](https://www.autohotkey.com/docs/v2/Objects.htm#object-literal) are accepted if the [`.extract_objects` property](#extract_objects) is set to true.  
 
-[All object types](https://www.autohotkey.com/docs/v2/ObjList.htm) are included if [`.extract_all` property](#extract_all) or [`extract_all` parameter](#--extract_all-bool-optional) are set to true.  
+[All object types](https://www.autohotkey.com/docs/v2/ObjList.htm) are accepted if the [`.extract_all` property](#extract_all) or [`extract_all` parameter](#--extract_all-bool-optional) are set to true.  
 
-In both cases, the object's `OwnProps()` is called and the data is exported as `{property_nam:value}` a map (JSON associative array).  
+Object types are exported in a `{key:value}` format, where the property name is used as the key.  
+Key names must be a [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings) or an error will be thrown.  
+
 
 ***
-### Stringify Replacers: Access to key:value pairs
+### Stringify Replacers: Access to `key:value` pairs
 
 The purpose of the `replacer` is to give the user access to each `key:value` pair before they're added to the JSON string.  
-This gives the user the option to keep, alter, or delete the value as well as the option to completely omit the key:value pair.
+This gives the user the option to keep, alter, or delete the value as well as the option to completely omit the `key:value` pair.
 
-A `replacer` can be either a [Function](https://www.autohotkey.com/docs/v2/misc/Functor.htm) or an [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm).  
+A `replacer` can be either a [Function()/FuncObject](https://www.autohotkey.com/docs/v2/misc/Functor.htm)/[Method()](https://www.autohotkey.com/docs/v2/Language.htm#operators-for-objects) or an [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm).  
 
 If `replacer` is a function, it is passed 3 parameters: `key`, `value`, and a special `remove` variable.  
-The user can then decide what they want to do with the value.  
-Keep, alter, delete, or remove the whole key:value pair from the string.  
+The user can then decide if they want to do with the value or `key:value` pair.
 
-Example of a `replacer` that removes social security numbers from an object before converting to JSON:
+Example of a `replacer` that redacts the name from any key called `secret_identity`:
 
 ```
-replacer(key, value, remove) {
-    if (key == "ssn")
-    	; Tells parser to discard this key:value pair
-    	return remove
+#Include jsongo.v2.ahk
+obj := [Map('first_name','Bruce' ,'last_name','Wayne' ,'secret_identity','Batman')
+        ,Map('first_name','Peter' ,'last_name','Parker' ,'secret_identity','Spider-Man')
+        ,Map('first_name','Steve' ,'last_name','Gray' ,'secret_identity','Lexikos')]
+json := jsongo.Stringify(obj, remove_hidden_identity, '`t')
+
+MsgBox(json)
+
+remove_hidden_identity(key, value, remove) {
+    if (key == 'secret_identity')
+        ; Tells parser to discard this key:value pair
+        return RegExReplace(value, '.', '#')
     ; If no matches, return original value
     return value
 }
 ```
 
-If `replacer` is an array, the array is treated as a list of forbidden key names.  
-If any key name matches something anything in the array, that key:value pair is discarded and not included in the JSON string.  
+If `replacer` is an [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm), the items of the array are treated as a list of forbidden key names.  
+They key of each `key:value` pair is checked against each item of the replacer array.  
+If a match is ever made, that `key:value` pair is discarded and not included in the JSON string.  
 Example of an array replacer:
 ```
 #Include jsongo.v2.ahk
@@ -482,17 +504,18 @@ json := jsongo.Stringify(obj, arr, '`t')
 MsgBox('2_object_num and 3_escapes do not appear in the JSON text output:`n`n' json)
 ```
 
-### Stringify Spacers: JSON string formatting options
+### Stringify Spacers: JSON string formatting option
 
-`spacer` can be a [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings) or a [Number](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers)].  
-The purpose of a spacer is to format the JSON output text into something more human-readable.  
+The purpose of a `spacer` is to format the JSON string.  
+`spacer` can be a [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings) or a [Number](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers).  
 
 If `spacer` is a number, it indicates that many spaces should be used for each level of indentation.  
 
 ```
+#Include jsongo.v2.ahk
 obj := Map('array',[1,2,3])
 json := jsongo.Stringify(obj, , 4)
-; Exports as:
+; Exports with 4 spaces for each level of indentation:
 ; {
 ;     "array": [
 ;         1,
@@ -504,48 +527,61 @@ json := jsongo.Stringify(obj, , 4)
 ```
 
 If `spacer` is a String, the string provided is used for each level of indentation.  
-While you **can** use any character in the spacer string, using anything other than valid whitespace `Space, Tab, Linefeed, Carriage Return` will cause the exported JSON file to no longer be a valid JSON string and thus cannot be imported back into an object (unless the custom formatting is removed, which could be easily done with a [`RegExReplace()`](https://www.autohotkey.com/docs/v2/lib/RegExReplace.htm)).  
+You are allowed to use any character in the `spacer` string, however, using any characters other than valid whitespace `Space, Tab, Linefeed, Carriage Return` will cause the exported JSON file to no longer be a valid JSON string.  
+It cannot be imported back into an object without removing the custom characters from the indentation.  
+This can easily be achieved with something like [`RegExReplace()`](https://www.autohotkey.com/docs/v2/lib/RegExReplace.htm))
 
-As long as the exported JSON is for human consumption, it's fine to use any characters you want.  
-Personally, I like using `'|   '` as a spacer because it makes a connecting line between elements which makes it easier for humans to read.  
+Try to reserve invalid characters for JSON intended for human consumption.  
+Personally, I like using `'|   '` as a spacer because it makes a connecting line between elements which makes it easier to read.  
 ```
-obj := Map('array',[[1,2,3],[4,5,6],[7,8,9]])
+#Include jsongo.v2.ahk
+obj := Map('matrix',[[1,2,3]
+                   ,[4,5,6]
+                   ,[7,8,9]])
 json := jsongo.Stringify(obj, , '|    ')
 MsgBox(json)
 
 ; Displays as:
-; "{
-; |    "array":[
-; |    |    [
-; |    |    |    1,
-; |    |    |    2,
-; |    |    |    3
-; |    |    ],
-; |    |    [
-; |    |    |    4,
-; |    |    |    5,
-; |    |    |    6
-; |    |    ],
-; |    |    [
-; |    |    |    7,
-; |    |    |    8,
-; |    |    |    9
-; |    |    ]
-; |    ]
-; }"
-```
+;  {
+;  |    "matrix": [
+;  |    |    [
+;  |    |    |    1,
+;  |    |    |    2,
+;  |    |    |    3
+;  |    |    ],
+;  |    |    [
+;  |    |    |    4,
+;  |    |    |    5,
+;  |    |    |    6
+;  |    |    ],
+;  |    |    [
+;  |    |    |    7,
+;  |    |    |    8,
+;  |    |    |    9
+;  |    |    ]
+;  |    ]
+;  }
 
-If `spacer` is `''` an empty string, or if the `spacer` parameter is omitted, no formatting is used and the exported JSON string will be exported as one single line of text.  
-Remember, actual Linefeeds that occur in strings are always encoded as `\u000A` as required by the JSON standard.  
-This is why everything exports as one line of text when no formatting is applied.
-This is also the most efficient way of exporting and importing JSON data and should be used when humans never need to look at it.
 
 ```
-obj := Map('array',[[1,2,3],[4,5,6],[7,8,9]])
+
+If `spacer` is `''` an empty string or the `spacer` parameter is omitted, no formatting is used and the exported JSON string will be exported as one single line of text.  
+Remember, actual Linefeeds (new lines) that occur in JSON strings are always encoded as `\u000A` or `\n` as required by the JSON standard.  
+This is why everything can export as one line of text when no formatting is applied.  
+This is also the most efficient way of exporting and importing JSON data as it has the fewest characters to parse through, making it he the fastest.
+
+```
+#Include jsongo.v2.ahk
+obj := Map('array1',[[1,2,3]
+                    ,[4,5,6]
+                    ,[7,8,9]]
+            ,'array2',[['a','b','c']
+                      ,['d','e','f']
+                      ,['g','h','i']])
 json := jsongo.Stringify(obj)
 MsgBox(json)
 ; Exports as:
-; {"array":[[1,2,3],[4,5,6],[7,8,9]]}
+; {"array1":[[1,2,3],[4,5,6],[7,8,9]],"array2":[["a","b","c"],["d","e","f"],["g","h","i"]]}
 ```
 
 ## 4) ChangeLog
