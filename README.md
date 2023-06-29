@@ -1,7 +1,7 @@
 # jsongo for AHKv2
 
 Full JSON support for AHKv2 written natively in AHK.  
-Closely mimics Mozilla's JSON format, including the optional parameters.  
+Closely mimics [Mozilla's JSON format](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON), including the optional parameters.  
 ```
 ; JSON string to AHK object
 object := Parse(json [,reviver])
@@ -13,8 +13,13 @@ json := Stringify(object [,replacer ,spacer ,extract_all])
 ## Contents
 
 ### **[Methods](#methods-1)**
-  * **[`.Parse()`](#parsejson-reviver--)**
-  * **[`.Stringify()`](#stringifyobject-replacer---spacer---extract_all--0)**
+  * **[`.Parse(json, [reviver])`](#parsejson-reviver--)**
+    * **[json [String]](#--json-string)**
+    * **[reviver [Function]](#--reviver-function-optional)**
+  * **[`.Stringify(object, [replacer, spacer, extract_all])`](#stringifyobject-replacer---spacer---extract_all--0)**
+    * **[replacer [Function | Array]](#--replacer-function-optional)**
+    * **[spacer [String | Number]](#--spacer-string--number-optional)**
+    * **[extract_all [Bool]](#--extract_all-bool-optional)**
   * **[`.Pretty()`]()**
 
 ### **[Properties](#properties-1)**
@@ -51,10 +56,10 @@ json := Stringify(object [,replacer ,spacer ,extract_all])
 
 Used to parse a string of JSON text into an AHK object.  
 
-* `json` [String]  
+#### - `json` [[String]](https://www.autohotkey.com/docs/v2/Concepts.htm#strings)  
  String containing JSON text.
 
-* `reviver` [Callback] **[OPTIONAL]**  
+#### - `reviver` [[Function]](https://www.autohotkey.com/docs/v2/misc/Functor.htm) **[OPTIONAL]**  
  Used to access all key:value pairs of the object before the value is assigned to the objct.  
  Reference to a function, method, or funcobject that accepts at least 3 parameters.  
  Parameters will accept the current `key`, `value`, and a special `remove` variable (respectively).  
@@ -62,7 +67,7 @@ Used to parse a string of JSON text into an AHK object.
  These function similarly to to Stringify() replacers.  
  See `Examples` section for more information on using revivers.
 
-* `RETURN => value`  
+#### - `RETURN => value`  
  Returns an object or a primitive depending on the JSON input.  
  Possible return types: Map, Array, String, Number  
  If an error occurs, the script with throw an error.  
@@ -70,24 +75,26 @@ Used to parse a string of JSON text into an AHK object.
  
 ### `.Stringify(object, [replacer := '', spacer := '', extract_all := 0])`  
 Used to convert an AHK object into a JSON string.  
-* `object` [Map | Array]  
-  Accepted input: `Map`, `Array`, `String`, `Number`  
-  `Literal Objects` are accepted if the `extract_objects` property is set to true. They will be exracted as a map.  
-  `All` object types are accepted if either the `extract_all` property or parameter are set to true.  
-* `replacer` [Callback] **[OPTIONAL]**  
+#### - `object` [[Map](https://www.autohotkey.com/docs/v2/lib/Map.htm) | [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm)]  
+  Accepted input: [[Map](https://www.autohotkey.com/docs/v2/lib/Map.htm), [Array](https://www.autohotkey.com/docs/v2/lib/Array.htm), [String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings), [Numbers](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers)]  
+  [`Literal Objects`](https://www.autohotkey.com/docs/v2/Objects.htm#object-literal) are accepted if the [`extract_objects`](#extract_objects) property is set to true.  
+  [`All object types`](https://www.autohotkey.com/docs/v2/ObjList.htm) are accepted if either the [`extract_all property`](#extract_all) or the [`extract_all parameter`](#--extract_all-bool-optional) are set to true.  
+#### - `replacer` [[Function]](https://www.autohotkey.com/docs/v2/misc/Functor.htm) **[OPTIONAL]**  
   Used to access all key:value pairs of the object before being exported to JSON string.  
   Reference to a function, method, or funcobject that has at least 3 parameters.  
   Parameters will accept the current `key`, `value`, and a special `remove` variable (respectively).  
   Function must always return one of the following: Original value, modified value, or the `remove` variable from parameter 3.  
   These function similarly to to Parse() rerivers.  
   See `Examples` section for more information on using replacers.  
-* `spacer` [String | Number] **[OPTIONAL]**  
+#### - `spacer` [[String](https://www.autohotkey.com/docs/v2/Concepts.htm#strings) | [Number](https://www.autohotkey.com/docs/v2/Concepts.htm#numbers)] **[OPTIONAL]**  
   Spacers are a way to format the JSON string output.  
   If spacer is a number, that many spaces will be used for intdentation.  
   If a string is used, the charcter set provided will be used for each level of indentation.  
   Valid whitespace [spaces, tabs, linefeeds, carriage returns] are the only valid charcters for indenting.  
-  You are allowed to use other characters, however doing so should be reserved for human consumption only as the resulting JSON string is no longer valid and can't be parsed back to an object.  
-* `RETURN => value`  
+  You are allowed to use other characters, however doing so should be reserved for human consumption only as the resulting JSON string is no longer valid and can't be parsed back to an object.
+#### - `extract_all` [[bool]](https://www.autohotkey.com/docs/v2/Concepts.htm#boolean) **[OPTIONAL]**  
+  Setting this to true is the same as setting the [`extract_all`](#extract_all) property to true.  
+#### - `RETURN => value`  
   Returns a valid JSON string  
   Possible return types: Map, Array, String, Number  
   If an error occurs, the script with throw an error  
@@ -109,8 +116,8 @@ Backslashes can be escaped two ways: Escape character `\\` and unicode escaping 
 * `false` => Backslashes are escaped using unicode `\u005c`
 
 ### `.extract_all`
-* `true` => When exporting an AHK object, any object derived from the base Object will be processed and exported as a map.  
-  Script will loop through any object's `OwnProps()` and save each property as a key:value pair.  
+* `true` => When exporting an AHK object to JSON, all valid Object types will be processed and exported as a map.  
+  The script will loop through the object's [`OwnProps()`](https://www.autohotkey.com/docs/v2/lib/Object.htm#OwnProps) and export each property as a key:value pair.  
 * `false` => **[Default]** Script will throw an error when encountering any object that's not an Array or Map.  
 
 ### `.extract_objects`  
@@ -152,8 +159,16 @@ object := jsongo.Parse(jsonString)
 
 ### Parse Revivers: `Parse(json, reviver)`
 
-The reviver should be a reference to a function or method.  
-It requires at least 3 parameters to receive the key name, value name, and a remove variable.  
+A reviver is a type of function that accepts all the key:value pairs as they're processed but before being added to the object.  
+This gives you the opportunity to change, or even omit, that value before it's added to the object.
+
+The reviver should be a reference to a function or method and must be able to accept 3 parameters.  
+
+Those paramters will be the `key` name, `value`, and a special `remove` variable.  
+Key will be either a String or a Number.  
+`Number` keys indicate array indices.  
+`String` keys indicate object keys.  
+You can use `Type()` to check the type of anything in AHKv2.
 
 Example of how a reviver function should be structured.  
 ```
@@ -164,29 +179,41 @@ reviver_function(key, value, remove) {
 }
 ```
 
-It's worth noting that You can have any amount of parameters and they can be optional.  
-The only requirement is that there's a place for all 3 parameter to be passed into. 
+The remove variable you're given in the 3rd parameter can be returned to indicate that key:value pair should be removed and not included in the object.  
+This means the  
 
-If you were going to blank out all values with a certain key name, the only parameter you need is the `key` parameter.  
-This would be a valid reviver:
+If you wanted to remove all key:value pairs that were labeled `temp_info`, you'd use this reviver:
 
 ```
-reviver_function(key, value, *) {
+reviver_function(key, value, remove) {
 	if (key == 'temp_info')
-	    return ''
-	return value
+	    return remove
+	else return value
 }
 ```
 
-`remove` is absorbed by the parameter tampon `*`. Yes, that is what I call it.  
+It's worth noting that you can have any amount of parameters and they can be optional.  
+The only requirement is there must be a place for all 3 parameter to go or AHK will throw an error (obviously).
+
+If you were never going to remove anything, this would be a valid reviver:
+
+reviver_function(key, value, *) {
+	if (key == 'temp_info')
+	    return remove
+	else return value
+}
+
+
+`remove` is absorbed by the parameter tampon `*`. Yes...that is what I call it.  
 It's actually a variadiac parameter that takes in any amount of parameters and puts them into an array.  
-With no value assigned the array, an array is never created and all the values fizzle.  
-Meaning they're discarded.
+With no value assigned the array, the array is never created and all the values fizzle. (Maning they're discarded.)
 
-### AHK objec to JSON text `Stringify(object)`
+Check out the [Examples](#examples-1) section for more on how to use revivers.
 
-The `Stringify()` method is used to turn an AHK object into a JSON string.  
+### AHK object to JSON text `Stringify(object)`
 
+The `Stringify()` method is used to turn an AHK object into JSON string.  
+	
 ```
 json := jsongo.Stringify(object)
 ```
@@ -194,14 +221,27 @@ json := jsongo.Stringify(object)
 Object can be a Map, Array, String, Integer, or Float.  
 By default, jsongo respects JSON's data structure and doesn't accept any other objects.  
 JSON is about transmitting data, not creating structures and prototypes in multiple languages.  
+In AHK, arrays and maps are meant for data storage.  
 
-This library comes with options some might want.  
-`extract_objects` causes AHK to additionally accpet literal objects.  
-It attempts to loop through all object properites and export them in associative array (map) format.  
+This library also comes with a couple of options for extracting other object types.  
+`extract_objects` causes jsongo to accpet literal objects.  
 `extract_all` causes AHK to accpet any object type.  
-It attempts to loop through all object properites and export them in associative array (map) format.
 
-### Stringify()
+In both cases, the object's `OwnProps()` is called, the property is uesd at the key name and the value is then recursively extracted.  
+Everything is exported in map format `{"property_name":property_value}`  
+
+### Stringify Replacers: `Stringify(object, replacer)`
+
+A replacer works EXACTLY like a reviver except for Stringify().  
+They're so much alike that I will not be going in-depth into them because it'll be a lot of repeating what's in the [reviver section]().
+
+Like a reviver, a replacer is a function or method and it must be able to accept 3 parameters.
+
+
+
+A replacer allows allows you to see each key:value pair before it gets put into the JSON string.  
+This allows you to alter things or remove items during the export process.  
+
 
 ### Stringify()
 
