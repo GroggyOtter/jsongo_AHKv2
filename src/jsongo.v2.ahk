@@ -1,8 +1,9 @@
 class jsongo {
     ; Creator: GroggyOtter
-    ; Date   : 20230622
-    ; URL    : https://github.com/GroggyOtter/jsongo_AHKv2
-    ; License: GNU (Free to use. Please keep this comment block with the code)
+    ; Created: 20230622
+    ; Updated: 20230630
+    ; Website: https://github.com/GroggyOtter/jsongo_AHKv2
+    ; License: GNU (Free to use but please keep these top comment lines with the code)
     #Requires AutoHotkey 2.0.2+
     static version := 'BETA'
     
@@ -140,7 +141,7 @@ class jsongo {
                 case  8: this.replace_if_exist(&jtxt, Chr(A_Index), '\b')
                 case 12: this.replace_if_exist(&jtxt, Chr(A_Index), '\f')
                 case 32: (this.escape_slash) ? this.replace_if_exist(&jtxt, '/', '\/') : 0
-                case 33: (this.escape_backslash) ? 1 : this.replace_if_exist(&jtxt, '\u005C', '\\')
+                case 33: (this.escape_backslash) ? this.replace_if_exist(&jtxt, '\u005C', '\\') : 0 
                 default: this.replace_if_exist(&jtxt, Chr(A_Index), Format('\u{:04X}', A_Index))
             }
         
