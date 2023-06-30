@@ -2,24 +2,28 @@ class jsongo {
     ; Creator: GroggyOtter
     ; Date   : 20230622
     ; URL    : https://github.com/GroggyOtter/jsongo_AHKv2
-    ; License: GNU (Free to use. Please keep this info block with the code)
+    ; License: GNU (Free to use. Please keep this comment block with the code)
     #Requires AutoHotkey 2.0.2+
     static version := 'BETA'
     
-    ; User Options
-    static escape_slash     := 0    ; true => Adds the optional escape character to forward slashes
+    ; User Options:
+    static escape_slash     := 1    ; true => Adds the optional escape character to forward slashes
         ,  escape_backslash := 1    ; true => Uses \\ for backslash escaping instead of \u005C
         ,  inline_arrays    := 0    ; true => Arrays containing only strings/numbers are kept on 1 line
-        ,  extract_objects  := 0    ; true => Attempts to extract literal objects in map format instead of erroring
-        ,  extract_all      := 0    ; true => Attempts to extract any object to map format instead of erroring
-        ,  silent_error     := 0    ; true => No more error popups and error_log property receives error message
+        ,  extract_objects  := 1    ; true => Attempts to extract literal objects in map format instead of erroring
+        ,  extract_all      := 1    ; true => Attempts to extract any object to map format instead of erroring
+        ,  silent_error     := 1    ; true => No more error popups and error_log property receives error message
         ,  error_log        := ''   ; Used to store error message when there's an error and silent_error is true
     
+    ; User methods:
     ; Parse(jtxt [,reviver])
     ;   jtxt [Str]      |  JSON string to convert into an AHK object
     ;   reviver [Func]  |  [Optional] Reference to a reviver(key, value, remove) function.
     ;                   |  The function must have at least 3 parameters to accept each key, value, and a special remove variable.
     ;                   |  A reviver allows you to interact with each key:value pair before being added to the object.
+    ;   RETURN          |  Success => Map, Array, String, or Number [Depending on JSON text]
+    ;                   |  Failure => an error is displayed
+    ;                   |  Failure + .silent_error is true => An empty string is returned and .error_log is set to error message
     static Parse(jtxt, reviver:='') => this._Parse(jtxt, reviver)
 
     ; Stringify(obj [,replacer ,spacer ,extract_all])
@@ -36,6 +40,9 @@ class jsongo {
     ;                        |  If omitted or an empty string is passed in, the JSON string will export as a single line of text
     ;   extract_all [Bool]   |  [Optional] true => all object types will be processed and exported in map format
     ;                        |  If omitted, the extract_all property value is used instead.
+    ;   RETURN               |  Success => Formatted JSON string
+    ;                        |  Failure => an error is displayed
+    ;                        |  Failure + .silent_error is true => An empty string is returned and .error_log is set to error message
     static Stringify(base_item, replacer:='', spacer:='', extract_all:=0) => this._Stringify(base_item, replacer, spacer, extract_all)
     
     static _Parse(jtxt, reviver:='') {
@@ -91,7 +98,6 @@ class jsongo {
         path_pop(&char) => (path.Length > 1) ? path.Pop() : err(38, ji, 'Size > 0', 'Actual size: ' path.Length-1)
         rev(value) => (path[path.Length] is Array) ? (if_rev ? value := reviver((path[path.Length].Length), value, remove) : 0, (value == remove) ? '' : path[path.Length].Push(value) ) : (if_rev ? value := reviver(key, value, remove) : 0, (value == remove) ? '' : path[path.Length][key] := value )
         err(msg_num, idx, ex:='', rcv:='') => (clip := '`n',  offset := 50,  clip := 'Error Location:`n', clip .= (idx > 1) ? SubStr(jtxt, 1, idx-1) : '',  (StrLen(clip) > offset) ? clip := SubStr(clip, (offset * -1)) : 0,  clip .= '>>>' SubStr(jtxt, idx, 1) '<<<',  post_clip := (idx < StrLen(jtxt)) ? SubStr(jtxt, ji+1) : '',  clip .= (StrLen(post_clip) > offset) ? SubStr(post_clip, 1, offset) : post_clip,  clip := StrReplace(clip, str_flag, '"'),  this.error(msg_num, fn, ex, rcv, clip), expect := xerr)
-        
         tfn_idx(a, b) {
             loop StrLen(a)
                 if SubStr(a, A_Index, 1) !== SubStr(b, A_Index, 1)
