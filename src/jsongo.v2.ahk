@@ -7,12 +7,12 @@ class jsongo {
     static version := 'BETA'
     
     ; User Options
-    static escape_slash     := 1    ; true => Adds the optional escape character to forward slashes
+    static escape_slash     := 0    ; true => Adds the optional escape character to forward slashes
         ,  escape_backslash := 1    ; true => Uses \\ for backslash escaping instead of \u005C
         ,  inline_arrays    := 0    ; true => Arrays containing only strings/numbers are kept on 1 line
-        ,  extract_objects  := 1    ; true => Attempts to extract literal objects in map format instead of erroring
-        ,  extract_all      := 1    ; true => Attempts to extract any object to map format instead of erroring
-        ,  silent_error     := 1    ; true => No more error popups and error_log property receives error message
+        ,  extract_objects  := 0    ; true => Attempts to extract literal objects in map format instead of erroring
+        ,  extract_all      := 0    ; true => Attempts to extract any object to map format instead of erroring
+        ,  silent_error     := 0    ; true => No more error popups and error_log property receives error message
         ,  error_log        := ''   ; Used to store error message when there's an error and silent_error is true
     
     ; Parse(jtxt [,reviver])
