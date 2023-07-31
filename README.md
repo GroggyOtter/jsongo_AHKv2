@@ -23,7 +23,7 @@ MsgBox(json)
 
 ## Contents
 
-### 0) [Preface: Preface, Peep(), `[]` Square Bracket Syntax, and "Why jsongo?"](#0-quick-syntax-clarification-and-peep-recommendation)
+### 0) [Preface: Quick syntax clarification and Peep() recommendations](#0-quick-syntax-clarification-and-peep-recommendation)
 
 ### 1) [.Methods()](#1-methods-1)
   * **[Parse()](#parse)**
@@ -587,6 +587,14 @@ MsgBox(json)
 ## 4) ChangeLog
 [`Back to Contents`](#contents)  
 
+### 1.0 - 20230731
+* Officially updated to v1.0
+* Updated documents to JSDoc comments
+  * This benefits editors like VS Code that utilize JSDoc tags.
+  * Intellisense tooltip info should now be much more robust.
+
 ### Beta - 20230627  
 * Initial release of jsongo
+
+
 
