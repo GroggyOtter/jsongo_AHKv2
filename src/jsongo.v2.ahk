@@ -1,51 +1,81 @@
+/**
+ * @author GroggyOtter <groggyotter@gmail.com>
+ * @version 1.0
+ * @see https://github.com/GroggyOtter/jsongo_AHKv2
+ * @license GNU
+ * @classdesc Library for conversion of JSON text to AHK object and vice versa
+ * 
+ * @property {number} escape_slash     - If true, adds the optional escape character to forward slashes
+ * @property {number} escape_backslash - If true, backslash is encoded as `\\` otherwise it is encoded as `\u005C`
+ * @property {number} inline_arrays    - If true, arrays containing only strings/numbers are kept on 1 line
+ * @property {number} extract_objects  - If true, attempts to extract literal objects instead of erroring
+ * @property {number} extract_all      - If true, attempts to extract all object types instead of erroring
+ * @property {number} silent_error     - If true, error popups are supressed and are instead written to the .error_log property
+ * @property {number} error_log        - Stores error messages when an error occurs and the .silent_error property is true
+ */
+jsongo
 class jsongo {
-    ; Creator: GroggyOtter
-    ; Created: 20230622
-    ; Updated: 20230630
-    ; Website: https://github.com/GroggyOtter/jsongo_AHKv2
-    ; License: GNU (Free to use but please keep these top comment lines with the code)
     #Requires AutoHotkey 2.0.2+
-    static version := 'BETA'
+    static version := '1.0'
     
-    ; User Options:
-    static escape_slash     := 1    ; true => Adds the optional escape character to forward slashes
-        ,  escape_backslash := 1    ; true => Uses \\ for backslash escaping instead of \u005C
-        ,  inline_arrays    := 0    ; true => Arrays containing only strings/numbers are kept on 1 line
-        ,  extract_objects  := 1    ; true => Attempts to extract literal objects in map format instead of erroring
-        ,  extract_all      := 1    ; true => Attempts to extract any object to map format instead of erroring
-        ,  silent_error     := 1    ; true => No more error popups and error_log property receives error message
-        ,  error_log        := ''   ; Used to store error message when there's an error and silent_error is true
+    ; === User Options ===
+    /** If true, adds the optional escape character to forward slashes */
+    static escape_slash := 1
+    /** If true, backslash is encoded as `\\` otherwise it is encoded as `\u005C` */
+    ,escape_backslash   := 1    
+    /** If true, arrays containing only strings/numbers are kept on 1 line */
+    ,inline_arrays      := 0
+    /** If true, attempts to extract literal objects instead of erroring */
+    ,extract_objects    := 1
+    /** If true, attempts to extract all object types instead of erroring */
+    ,extract_all        := 1
+    /** If true, error popups are supressed and are instead written to the .error_log property */
+    ,silent_error       := 1
+    /** Stores error messages when an error occurs and the .silent_error property is true */
+    ,error_log          := ''
     
-    ; User methods:
-    ; Parse(jtxt [,reviver])
-    ;   jtxt [Str]      |  JSON string to convert into an AHK object
-    ;   reviver [Func]  |  [Optional] Reference to a reviver(key, value, remove) function.
-    ;                   |  The function must have at least 3 parameters to accept each key, value, and a special remove variable.
-    ;                   |  A reviver allows you to interact with each key:value pair before being added to the object.
-    ;   RETURN          |  Success => Map, Array, String, or Number [Depending on JSON text]
-    ;                   |  Failure => an error is displayed
-    ;                   |  Failure + .silent_error is true => An empty string is returned and .error_log is set to error message
+    ; === User Methods ===
+    /**
+     * Converts a string of JSON text into an AHK object
+     * @param {[`String`](https://www.autohotkey.com/docs/v2/lib/String.htm)} jtxt JSON string to convert into an AHK [object](https://www.autohotkey.com/docs/v2/lib/Object.htm)  
+     * @param {[`Function Object`](https://www.autohotkey.com/docs/v2/misc/Functor.htm)} [reviver=''] [optional] Reference to a reviver function.  
+     * A reviver function receives each key:value pair before being added to the object and must have at least 3 parameters.  
+     * @returns {([`Map`](https://www.autohotkey.com/docs/v2/lib/Map.htm)|[`Array`](https://www.autohotkey.com/docs/v2/lib/Array.htm)|[`String`](https://www.autohotkey.com/docs/v2/Objects.htm#primitive))} Return type is based on JSON text input.  
+     * On failure, an error message is thrown or an empty string is returned if `.silent_error` is true
+     * @access public
+     * @method
+     * @Example 
+     * txt := '{"a":1, "b":2}'
+     * obj := jsongo.Parse(txt)
+     * MsgBox(obj['b']) ; Shows 2
+     */
     static Parse(jtxt, reviver:='') => this._Parse(jtxt, reviver)
-
-    ; Stringify(obj [,replacer ,spacer ,extract_all])
-    ;   obj [Map|Arr]        |  Map, array, string, and number are accepted JSON values.
-    ;                        |  Literal objects are accepted if the .extract_objects property is set to true.
-    ;                        |  All objects are accepted if the .extract_all property or extract_all parameter are true.
-    ;                        |  A replacer allows you to interact with each key:value pair before being added to the JSON string.
-    ;   replacer [Func|Arr]  |  [Optional] A replacer allows you to interact with each key:value pair before it's addedto the object.
-    ;                        |  If replacer is function, it must have at least 3 parameters and works similarly to a Parse() reviver.
-    ;                        |  If replacer is array, each key is compared to each element and if a match is made, that key:value pair is discarded.
-    ;   spacer [Str|Num]     |  [Optional] Defines the character set used to space each level of the JSON tree.
-    ;                        |  Use a number indicates the number of spaces to use. 4 => 4 spaces => '    '
-    ;                        |  Str indiciates the string to use. '`t' => 1 tab for each indent level
-    ;                        |  If omitted or an empty string is passed in, the JSON string will export as a single line of text
-    ;   extract_all [Bool]   |  [Optional] true => all object types will be processed and exported in map format
-    ;                        |  If omitted, the extract_all property value is used instead.
-    ;   RETURN               |  Success => Formatted JSON string
-    ;                        |  Failure => an error is displayed
-    ;                        |  Failure + .silent_error is true => An empty string is returned and .error_log is set to error message
+    
+    /**
+     * Converts a string of JSON text into an AHK object
+     * @param {([`Map`](https://www.autohotkey.com/docs/v2/lib/Map.htm)|[`Array`](https://www.autohotkey.com/docs/v2/lib/Array.htm))} base_item - A map or array to convert into JSON format.  
+     * If the `.extract_objects` property is true, literal objects are also accepted.  
+     * If the `.extract_all` property or the `extract_all` parameter are true, all object types are accepted.  
+     * @param {[`Function Object`](https://www.autohotkey.com/docs/v2/misc/Functor.htm)} [replacer=''] - [optional] Reference to a replacer function.  
+     * A replacer function receives each key:value pair before being added to the JSON string.  
+     * The function must have at least 3 parameters to receive the key, the value, and the removal variable.  
+     * @param {([`String`](https://www.autohotkey.com/docs/v2/Objects.htm#primitive)|[`Number`](https://www.autohotkey.com/docs/v2/Objects.htm#primitive))} [spacer=''] - Defines the character set used to indent each level of the JSON tree.  
+     * Number indicates the number of spaces to use for each indent.  
+     * String indiciates the characters to use. `` `t `` would be 1 tab for each indent level.  
+     * If omitted or an empty string is passed in, the JSON string will export as a single line of text.  
+     * @param {[`Number`](https://www.autohotkey.com/docs/v2/Objects.htm#primitive)} [extract_all=0] - If true, `base_item` can be any object type instead of throwing an error.
+     * @returns {[`String`](https://www.autohotkey.com/docs/v2/Objects.htm#primitive)} Return JSON string
+     * On failure, an error message is thrown or an empty string is returned if `.silent_error` is true
+     * @access public
+     * @method
+     * @Example 
+     * obj := Map('a', [1,2,3], 'b', [4,5,6])
+     * json := jsongo.Stringify(obj, , 4)
+     * MsgBox(json)
+     */
     static Stringify(base_item, replacer:='', spacer:='', extract_all:=0) => this._Stringify(base_item, replacer, spacer, extract_all)
     
+    /** @access private */
     static _Parse(jtxt, reviver:='') {
         this.error_log := '', if_rev := (reviver is Func && reviver.MaxParams > 2) ? 1 : 0, xval := 1, xobj := 2, xarr := 3, xkey := 4, xstr := 5, xend := 6, xcln := 7, xeof := 8, xerr := 9, null := '', str_flag := Chr(5), tmp_q := Chr(6), tmp_bs:= Chr(7), expect := xval, json := [], path := [json], key := '', is_key:= 0, remove := jsongo.JSON_Remove(), fn := A_ThisFunc
         loop 31
@@ -106,6 +136,7 @@ class jsongo {
         }
     }
     
+    /** @access private */
     static _Stringify(base_item, replacer, spacer, extract_all) {
         switch Type(replacer) {
             case 'Func': if_rep := (replacer.MaxParams > 2) ? 1 : 0
@@ -183,9 +214,12 @@ class jsongo {
         err(msg_num, ex:='', rcv:='') => this.error(msg_num, fn, ex, rcv)
     }
 
+    /** @access private */
     class JSON_Remove {
     }
+    /** @access private */
     static replace_if_exist(&txt, find, replace) => (InStr(txt, find, 1) ? txt := StrReplace(txt, find, replace, 1) : 0)
+    /** @access private */
     static error(msg_num, fn, ex:='', rcv:='', extra:='') {
         err_map := Map(11,'Stringify error: Object keys must be strings.'  ,12,'Stringify error: Literal objects are not extracted unless:`n-The extract_objects property is set to true`n-The extract_all property is set to true`n-The extract_all parameter is set to true.'  ,13,'Stringify error: Invalid object found.`nTo extract all objects:`n-Set the extract_all property to true`n-Set the extract_all parameter to true.'  ,14,'Stringify error: Invalid value was returned from Replacer() function.`nReplacer functions should always return a string or the "remove" value passed into the 3rd parameter.'  ,15,'Stringify error: Invalid object encountered.'  ,21,'Parse error: Forbidden character found.`nThe first 32 ASCII chars are forbidden in JSON text`nTab, linefeed, and carriage return may appear as whitespace.'  ,22,'Parse error: Invalid hex found in unicode escape.`nUnicode escapes must be in the format \u#### where #### is a hex value between 0000 and FFFF.`nHex values are not case sensitive.'  ,23,'Parse error: Invalid escape character found.'  ,24,'Parse error: Could not find end of string'  ,25,'Parse error: Invalid number found.'  ,26,'Parse error: Invalid `'true`' value.'  ,27,'Parse error: Invalid `'false`' value.'  ,28,'Parse error: Invalid `'null`' value.'  ,29,'Parse error: Invalid value encountered.'  ,31,'Parse error: Invalid object item.'  ,32,'Parse error: Invalid object key.`nObject values must have a string for a key name.'  ,33,'Parse error: Invalid key:value separator.`nAll keys must be separated from their values with a colon.'  ,34,'Parse error: Invalid end of array.'  ,35,'Parse error: Invalid end of object.'  ,36,'Parse error: Invalid end of value.'  ,37,'Parse error: JSON has objects/arrays that have not been terminated.'  ,38,'Parse error: Cannot remove an object/array that does not exist.`nThis error is usually thrown when there are extra closing brackets (array)/curly braces (object) in the JSON string.'  ,39,'Parse error: Invalid whitespace character found in string.`nTabs, linefeeds, and carriage returns must be escaped as \t \n \r (respectively).'  ,40,'Characters appears after JSON has ended.' )
         msg := err_map[msg_num], (ex != '') ? msg .= '`nEXPECTED: ' ex : 0, (rcv != '') ? msg .= '`nRECEIVED: ' rcv : 0
