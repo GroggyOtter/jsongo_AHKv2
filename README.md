@@ -587,7 +587,14 @@ MsgBox(json)
 ## 4) ChangeLog
 [`Back to Contents`](#contents)  
 
-### 1.0 - 20230731
+### 1.2.0 - 20250225
+* Fixed two weird backticks showing up in my code. IDK how they got there.
+* Updated version number but nothing else major was changed.
+
+### 1.1.0 - 20240101
+* Fixed a bunch of JSDoc tags
+
+### 1.0.0 - 20230731
 * Officially updated to v1.0
 * Updated documents to JSDoc comments
   * This benefits editors like VS Code that utilize JSDoc tags.
